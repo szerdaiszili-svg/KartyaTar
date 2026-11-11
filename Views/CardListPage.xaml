@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- VIEW = "az asztal", amit a vendég (a felhasználó) lát. Csak megjelenít, gondolkodni nem tud:
+     minden gombnyomást a ViewModelnek ad tovább. A {Binding ...} a "drót" a ViewModel felé. -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:KartyaTar2.ViewModels"
+             xmlns:models="clr-namespace:KartyaTar2.Models"
+             x:Class="KartyaTar2.Views.CardListPage"
+             x:DataType="vm:CardListViewModel"
+             Title="Kártyák">
+
+    <Grid RowDefinitions="*,Auto" Padding="12" RowSpacing="8">
+
+        <!-- A lista: minden kártyához egy "doboz" -->
+        <CollectionView Grid.Row="0" ItemsSource="{Binding Cards}" SelectionMode="None">
+
+            <CollectionView.EmptyView>
+                <Label Text="Még nincs kártya. Nyomd meg az Új kártya gombot!"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Card">
+                    <Border Stroke="Gray" StrokeThickness="1" Padding="10" Margin="0,5"
+                            StrokeShape="RoundRectangle 10">
+                        <!-- Rákoppintva megnyílik a szerkesztő -->
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CardListViewModel}}, Path=EditCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <Image Grid.Column="0" Source="{Binding PhotoPath}" IsVisible="{Binding HasPhoto}"
+                                   WidthRequest="60" HeightRequest="60" Aspect="AspectFill" />
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="{Binding Series}" FontSize="12" />
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="2" Text="{Binding PriceText}"
+                                   VerticalOptions="Center" FontAttributes="Bold" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="1" Text="Új kártya" Command="{Binding AddCommand}" />
+    </Grid>
+</ContentPage>

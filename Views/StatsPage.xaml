@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:KartyaTar2.ViewModels"
+             xmlns:models="clr-namespace:KartyaTar2.Models"
+             x:Class="KartyaTar2.Views.StatsPage"
+             x:DataType="vm:StatsViewModel"
+             Title="Statisztika">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="12">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="8">
+            <Label Text="Szűrők" FontAttributes="Bold" FontSize="18" />
+            <Picker Title="Sorozat" ItemsSource="{Binding SeriesOptions}" SelectedItem="{Binding SelectedSeries}" />
+            <Entry Placeholder="Legalább ennyi forintot érő kártyák (pl. 5000)"
+                   Keyboard="Numeric" Text="{Binding MinPriceText}" />
+            <Label Text="{Binding HintText}" TextColor="Red" FontSize="12" />
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="12">
+            <Label Grid.Row="0" Text="Találat" />
+            <Label Grid.Row="0" Grid.Column="1" Text="{Binding CountText}" FontAttributes="Bold" />
+
+            <Label Grid.Row="1" Text="Együtt ér" />
+            <Label Grid.Row="1" Grid.Column="1" Text="{Binding TotalText}" FontAttributes="Bold" />
+
+            <Label Grid.Row="2" Text="Legdrágább" />
+            <Label Grid.Row="2" Grid.Column="1" Text="{Binding TopText}" FontAttributes="Bold" />
+        </Grid>
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Cards}" SelectionMode="None">
+            <CollectionView.EmptyView>
+                <Label Text="Nincs a szűrőknek megfelelő kártya."
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Card">
+                    <Border Stroke="Gray" StrokeThickness="1" Padding="10" Margin="0,4"
+                            StrokeShape="RoundRectangle 10">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:StatsViewModel}}, Path=EditCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                <Label Text="{Binding Series}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="1" Text="{Binding PriceText}"
+                                   VerticalOptions="Center" FontAttributes="Bold" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

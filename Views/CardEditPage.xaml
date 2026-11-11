@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:KartyaTar2.ViewModels"
+             x:Class="KartyaTar2.Views.CardEditPage"
+             x:DataType="vm:CardEditViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+
+            <!-- A fotó (csak akkor látszik, ha van) -->
+            <Image Source="{Binding PhotoPath}" IsVisible="{Binding HasPhoto}"
+                   HeightRequest="200" Aspect="AspectFit" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="Fotó készítése" Command="{Binding TakePhotoCommand}" />
+                <Button Grid.Column="1" Text="Kép a galériából" Command="{Binding PickPhotoCommand}" />
+            </Grid>
+
+            <!-- A beviteli mezők: amit beírsz, a ViewModelbe kerül -->
+            <Label Text="Név *" />
+            <Entry Text="{Binding Name}" Placeholder="pl. Kimi Antonelli" />
+
+            <Label Text="Sorozat" />
+            <Entry Text="{Binding Series}" Placeholder="pl. Topps Chrome F1 2025" />
+
+            <Label Text="Ár (Ft)" />
+            <Entry Text="{Binding PriceText}" Keyboard="Numeric" Placeholder="pl. 5000" />
+
+            <Button Text="Mentés" Command="{Binding SaveCommand}" />
+            <Button Text="Megosztás" Command="{Binding ShareCommand}" />
+            <Button Text="Törlés" Command="{Binding DeleteCommand}"
+                    IsVisible="{Binding IsExisting}" BackgroundColor="Red" />
+            <Button Text="Mégse" Command="{Binding CancelCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
