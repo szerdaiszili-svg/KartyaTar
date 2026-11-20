@@ -6,36 +6,29 @@ using KartyaTar2.Services;
 
 namespace KartyaTar2.ViewModels;
 
-// A statisztika oldal "pincére". Ez az oldal nem csak számokat mutat: a felhasználó szűrhet
-// (melyik sorozat, legalább hány forintot érő kártyák), és a találatok listájából
-// bármelyik kártyát megnyithatja szerkesztésre.
 public partial class StatsViewModel : ObservableObject
 {
     private const string AllSeries = "Összes sorozat";
 
     private readonly DatabaseService _db;
-    private List<Card> _all = new();     // az összes kártya (a szűrés ebből dolgozik)
+    private List<Card> _all = new();
 
     public StatsViewModel(DatabaseService db)
     {
         _db = db;
     }
 
-    // A listák, amiket a képernyő mutat
     public ObservableCollection<string> SeriesOptions { get; } = new();
-    public ObservableCollection<Card> Cards { get; } = new();    // a szűrés után megmaradt kártyák
+    public ObservableCollection<Card> Cards { get; } = new();
 
-    // A két szűrő: amit a felhasználó kiválaszt vagy beír, ide kerül
     [ObservableProperty] private string? selectedSeries = AllSeries;
     [ObservableProperty] private string minPriceText = "";
 
-    // Az eredmények
     [ObservableProperty] private string countText = "0 db";
     [ObservableProperty] private string totalText = "0 Ft";
     [ObservableProperty] private string topText = "-";
     [ObservableProperty] private string hintText = "";
 
-    // Amint a felhasználó átállít egy szűrőt, azonnal újraszámolunk
     partial void OnSelectedSeriesChanged(string? value) => ApplyFilter();
     partial void OnMinPriceTextChanged(string value) => ApplyFilter();
 
@@ -46,7 +39,6 @@ public partial class StatsViewModel : ObservableObject
         {
             _all = await _db.GetCardsAsync();
 
-            // A sorozat-választó listája: "Összes" + az összes különböző sorozat
             var current = SelectedSeries ?? AllSeries;
             SeriesOptions.Clear();
             SeriesOptions.Add(AllSeries);
@@ -62,8 +54,7 @@ public partial class StatsViewModel : ObservableObject
             await Shell.Current.DisplayAlert("Hiba", ex.Message, "OK");
         }
     }
-
-    // A szűrés: a teljes listából csak azok maradnak, amelyek mindkét feltételnek megfelelnek
+    
     private void ApplyFilter()
     {
         IEnumerable<Card> result = _all;
@@ -71,7 +62,6 @@ public partial class StatsViewModel : ObservableObject
         if (!string.IsNullOrEmpty(SelectedSeries) && SelectedSeries != AllSeries)
             result = result.Where(c => c.Series == SelectedSeries);
 
-        // Minimum ár: ha üres, nem szűrünk; ha nem szám, figyelmeztetünk
         HintText = "";
         var text = MinPriceText?.Replace(" ", "") ?? "";
         if (text.Length > 0)
@@ -93,7 +83,6 @@ public partial class StatsViewModel : ObservableObject
         TopText = top != null && top.PriceFt > 0 ? $"{top.Name} ({top.PriceFt:N0} Ft)" : "-";
     }
 
-    // A találati listában egy kártyára koppintva megnyílik a szerkesztője
     [RelayCommand]
     private async Task EditAsync(Card? card)
     {
