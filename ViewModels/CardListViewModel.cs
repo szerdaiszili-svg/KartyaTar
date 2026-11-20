@@ -6,13 +6,10 @@ using KartyaTar2.Services;
 
 namespace KartyaTar2.ViewModels;
 
-// VIEWMODEL = "a pincér". Nem ő főz (adatbázis), és nem ő az asztal (a képernyő),
-// hanem ő viszi az információt a kettő között, és ő intézi, mi történik egy gombnyomásra.
 public partial class CardListViewModel : ObservableObject
 {
     private readonly DatabaseService _db;
 
-    // Az a lista, amit a képernyő mutat. Ha ebben változik valami, a képernyő magától frissül.
     public ObservableCollection<Card> Cards { get; } = new();
 
     public CardListViewModel(DatabaseService db)
@@ -20,7 +17,6 @@ public partial class CardListViewModel : ObservableObject
         _db = db;
     }
 
-    // [RelayCommand] = ebből a metódusból "gombra köthető parancs" lesz (LoadCommand)
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -37,7 +33,6 @@ public partial class CardListViewModel : ObservableObject
         }
     }
 
-    // "Új kártya" gomb: megnyitjuk a szerkesztő oldalt, üresen
     [RelayCommand]
     private async Task AddAsync()
     {
@@ -45,7 +40,6 @@ public partial class CardListViewModel : ObservableObject
         catch (Exception ex) { await Shell.Current.DisplayAlert("Hiba", ex.Message, "OK"); }
     }
 
-    // Egy kártyára koppintás: megnyitjuk a szerkesztőt, és átadjuk, melyik kártya az (Id)
     [RelayCommand]
     private async Task EditAsync(Card? card)
     {

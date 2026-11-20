@@ -5,14 +5,12 @@ using KartyaTar2.Services;
 
 namespace KartyaTar2.ViewModels;
 
-// A szerkesztő oldal "pincére": új kártyát vesz fel, vagy egy meglévőt módosít.
-// A [QueryProperty] azt jelenti: ha az előző oldal átad egy "Id"-t, azt ide, a CardIdText-be kapjuk meg.
 [QueryProperty(nameof(CardIdText), "Id")]
 public partial class CardEditViewModel : ObservableObject
 {
     private readonly DatabaseService _db;
     private readonly PhotoService _photos;
-    private Card _card = new();          // az a kártya, amit éppen szerkesztünk
+    private Card _card = new();
     private bool _loaded;
 
     public CardEditViewModel(DatabaseService db, PhotoService photos)
@@ -23,23 +21,21 @@ public partial class CardEditViewModel : ObservableObject
 
     public string CardIdText { get; set; } = "";
 
-    // [ObservableProperty] = a képernyő mezői ezekhez vannak kötve ("összedrótozva").
-    // Ha a felhasználó beír valamit, ide kerül; ha itt átírjuk, a mező is megváltozik.
+    
     [ObservableProperty] private string title = "Új kártya";
-    [ObservableProperty] private bool isExisting;      // true = meglévő kártyát szerkesztünk
+    [ObservableProperty] private bool isExisting;
     [ObservableProperty] private string name = "";
     [ObservableProperty] private string series = "";
     [ObservableProperty] private string priceText = "";
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPhoto))]       // ha a kép változik, a HasPhoto is jelezzen
+    [NotifyPropertyChangedFor(nameof(HasPhoto))]
     private string photoPath = "";
 
     public bool HasPhoto => !string.IsNullOrEmpty(PhotoPath);
 
     private static Task ShowError(string message) => Shell.Current.DisplayAlert("Hiba", message, "OK");
 
-    // Az oldal megjelenésekor: ha meglévő kártya, betöltjük az adatait a mezőkbe
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -90,7 +86,6 @@ public partial class CardEditViewModel : ObservableObject
         catch (Exception ex) { await ShowError(ex.Message); }
     }
 
-    // FUNKCIÓ 2: megosztás (a telefon saját "Megosztás" ablakát nyitja meg)
     [RelayCommand]
     private async Task ShareAsync()
     {
@@ -107,7 +102,6 @@ public partial class CardEditViewModel : ObservableObject
         catch (Exception ex) { await ShowError($"A megosztás nem sikerült: {ex.Message}"); }
     }
 
-    // MENTÉS: először ellenőrizzük, hogy jó-e, amit a felhasználó beírt
     [RelayCommand]
     private async Task SaveAsync()
     {
@@ -131,13 +125,12 @@ public partial class CardEditViewModel : ObservableObject
 
         try
         {
-            await _db.SaveCardAsync(_card);       // új vagy módosítás: a Service eldönti
-            await Shell.Current.GoToAsync("..");  // vissza a listára
+            await _db.SaveCardAsync(_card);
+            await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex) { await ShowError($"A mentés nem sikerült: {ex.Message}"); }
     }
 
-    // TÖRLÉS: előbb rákérdezünk, hogy biztos-e
     [RelayCommand]
     private async Task DeleteAsync()
     {

@@ -1,15 +1,13 @@
 namespace KartyaTar2.Services;
 
-// SERVICE = "a fényképész". Elkészíti vagy kiválasztja a képet, és eltesz egy másolatot az app saját mappájába.
-public class PhotoService
+
+public class PhotoService : IPhotoService
 {
-    // Fotó készítése a kamerával. Ha a felhasználó mégsem fotózik, null-t adunk vissza.
     public async Task<string?> TakePhotoAsync()
     {
         if (!MediaPicker.Default.IsCaptureSupported)
             throw new InvalidOperationException("Ezen a gépen nincs használható kamera.");
 
-        // Engedélyt kérünk a kamerához (mint amikor a telefon rákérdez: "Engedélyezed?")
         var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
         if (status != PermissionStatus.Granted)
             status = await Permissions.RequestAsync<Permissions.Camera>();
@@ -17,35 +15,44 @@ public class PhotoService
             throw new UnauthorizedAccessException("Engedély nélkül nem tudok fotózni.");
 
         var photo = await MediaPicker.Default.CapturePhotoAsync();
-        return photo == null ? null : await SaveAsync(photo);
+        return photo == null ? null : await SavePhotoAsync(photo);
     }
 
-    // Kép kiválasztása a galériából (ha nincs kamera, vagy kész kép kell)
     public async Task<string?> PickPhotoAsync()
     {
         var photo = await MediaPicker.Default.PickPhotoAsync();
-        return photo == null ? null : await SaveAsync(photo);
+        return photo == null ? null : await SavePhotoAsync(photo);
     }
 
-    // A képet átmásoljuk az app saját mappájába, új, egyedi névvel
-    private static async Task<string> SaveAsync(FileResult photo)
+    private async Task<string> SavePhotoAsync(FileResult photo)
     {
-        var dir = Path.Combine(FileSystem.AppDataDirectory, "photos");
-        Directory.CreateDirectory(dir);
+        string folder = Path.Combine(FileSystem.Current.AppDataDirectory, "photos");
+        Directory.CreateDirectory(folder);
 
-        var ext = Path.GetExtension(photo.FileName);
-        if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-        var path = Path.Combine(dir, $"{Guid.NewGuid()}{ext}");
+        string extension = Path.GetExtension(photo.FileName);
+        if (string.IsNullOrEmpty(extension))
+            extension = ".jpg";
 
-        using var source = await photo.OpenReadAsync();
-        using var target = File.OpenWrite(path);
-        await source.CopyToAsync(target);
-        return path;
+        string fileName = $"card_{DateTime.Now:yyyyMMdd_HHmmss_fff}{extension}";
+        string targetPath = Path.Combine(folder, fileName);
+
+        using Stream sourceStream = await photo.OpenReadAsync();
+        using FileStream localFileStream = File.OpenWrite(targetPath);
+        await sourceStream.CopyToAsync(localFileStream);
+
+        return targetPath;
     }
 
-    public static void DeleteFile(string? path)
+    public void DeletePhoto(string? path)
     {
-        try { if (!string.IsNullOrEmpty(path) && File.Exists(path)) File.Delete(path); }
-        catch { /* nem baj, ha a törlés nem sikerül */ }
+        try
+        {
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                File.Delete(path);
+        }
+        catch
+        {
+            /* A nagy semmi */
+        }
     }
 }

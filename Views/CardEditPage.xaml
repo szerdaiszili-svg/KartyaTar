@@ -9,7 +9,6 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="10">
 
-            <!-- A fotó (csak akkor látszik, ha van) -->
             <Image Source="{Binding PhotoPath}" IsVisible="{Binding HasPhoto}"
                    HeightRequest="200" Aspect="AspectFit" />
 
@@ -18,7 +17,6 @@
                 <Button Grid.Column="1" Text="Kép a galériából" Command="{Binding PickPhotoCommand}" />
             </Grid>
 
-            <!-- A beviteli mezők: amit beírsz, a ViewModelbe kerül -->
             <Label Text="Név *" />
             <Entry Text="{Binding Name}" Placeholder="pl. Kimi Antonelli" />
 
